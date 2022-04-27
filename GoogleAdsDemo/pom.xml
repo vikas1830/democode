@@ -35,7 +35,7 @@
 		<dependency>
 			<groupId>com.joveo</groupId>
 			<artifactId>eqr-test-sdk</artifactId>
-			<version>2.0.76</version>
+			<version>2.022</version>
 		</dependency>
 		<dependency>
 			<groupId>com.atlassian.jira</groupId>
