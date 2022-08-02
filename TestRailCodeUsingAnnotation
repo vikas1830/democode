@@ -1,0 +1,58 @@
+public class TestLogin {
+    static Logger logger = LoggerFactory.getLogger(TestLogin.class);
+    public String projectId = "projectID";
+    public Long runId;
+    TestRailEntity testRailEntity;
+   public Driver driver;
+    @BeforeSuite
+    public void createSuite() throws IOException, TestRailsException, MojoException {
+        driver=Driver.start("reliability@joveo.com","Joveo$reliability1520",JoveoEnvironment.Staging);
+        testRailEntity=new TestRailEntity(driver);
+        runId= testRailEntity.createTestRun("testTempMojo",projectId);
+    }
+
+    @BeforeMethod(alwaysRun = true)
+    public void setup(Method method, Object[] params, ITestContext ctx) throws Exception {
+        testRailEntity.setCaseIdUsingAnnotationOrDataProvider(method,params,ctx);
+    }
+
+    /** push all the test cases result on test rails.*/
+    @AfterMethod
+    public void afterTest(ITestResult result, ITestContext ctx) throws IOException,
+ TestRailsException {
+        testRailEntity.addResultForCases(result,ctx,AutomationType.API,runId);
+    }
+
+    @TestRails(id = "caseid")
+    @Test(dataProvider = "sanityLogin", dataProviderClass = dp.class)
+    public void testLogin(String username,String password,boolean expected,String caseID) throws IOException,
+ TestRailsException {
+       Session session = null;
+        Driver driver = null;
+        try {
+            driver = Driver.start(username, password, JoveoEnvironment.Staging);
+            session = driver.session;
+            logger.info(session.getUsername());
+        } catch (ServerErrorException e) {
+            if (expected) {
+                logger.info("Login not working as expected - " + e.getMessage());
+                Assert.fail("Login not working properly , API not working properly.");
+            } else {
+                logger.info("Working as expected , didn't login for wrong credentials.");
+            }
+        } catch (MojoException e) {
+            logger.info("Not able to create driver " + e.getMessage());
+            Assert.fail("Not able to create driver");
+        }
+        if (driver != null) {
+            try {
+                driver.logout(session);
+            } catch (ApiRequestException | UnexpectedResponseException | IOException e) {
+                logger.info("Not able to log out , something is wrong - " + e.getMessage());
+                Assert.fail("Logout API not working properly");
+            }
+        }
+    }
+
+
+ }
