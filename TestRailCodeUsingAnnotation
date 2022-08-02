@@ -25,7 +25,7 @@ public class TestLogin {
 
     @TestRails(id = "caseid")
     @Test(dataProvider = "sanityLogin", dataProviderClass = dp.class)
-    public void testLogin(String username,String password,boolean expected,String caseID) throws IOException,
+    public void testLogin(String username,String password,boolean expected) throws IOException,
  TestRailsException {
        Session session = null;
         Driver driver = null;
