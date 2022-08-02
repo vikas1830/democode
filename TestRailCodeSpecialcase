@@ -1,0 +1,35 @@
+public String projectId = "projectID";
+    public Long runId;
+    TestRailEntity testRailEntity;
+   public Driver driver;
+   
+    @BeforeSuite
+    public void createSuite() throws IOException, TestRailsException, MojoException {
+        driver=Driver.start("reliability@joveo.com","Joveo$reliability1520",JoveoEnvironment.Staging);
+        testRailEntity=new TestRailEntity(driver);
+    
+    }
+    
+@Test
+public static testAllmandatoryfieldgettingcaptured(){
+   //We will search and get all the case ids as per requirement 
+   ArrayList<Integer> caseIDs= testRailEntity.getTcIdUsingSearch(projectId,"searchString",
+             SearchOperator.contains);
+   
+   //we will create testrun 
+     runId= testRailEntity.createTestRun("testTempMojotest",projectId);
+     
+     //test and update the result of caseid and store in the map.
+     ResultDetails details=new ResultDetails();
+      details.setResult(true);
+      details.setFailureReason("Error");
+      Map<String,ResultDetails> resultDetailsMap=new HashMap<>();
+       for (Integer caseid:caseIDs) {
+         resultDetailsMap.put(caseid.toString(), details);
+         }
+
+
+      // post the results on testrun 
+      testRailEntity.updateResultsToTestRun(runId,resultDetailsMap,AutomationType.API);
+
+}
